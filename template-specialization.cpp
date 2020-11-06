@@ -5,9 +5,11 @@ private:
     char m_data;
 public:
     Object() : m_data{} {
+
     }
 
     explicit Object(char data) : m_data{data} {
+
     }
 
     friend std::ostream &operator<<(std::ostream &out, const Object &obj) {
@@ -117,6 +119,7 @@ public:
 template<int size>
 class Storage<Object, size> : public BaseStorage<Object, size> {
 public:
+
     friend std::ostream &operator<<(std::ostream &out, const Storage &str) {
         out << "Storage data: ";
         for (int i{0}; i < str.m_length; ++i) {
@@ -132,6 +135,9 @@ public:
 template<int size>
 class Storage<Object *, size> : public BaseStorage<Object *, size> {
 public:
+    Storage() : BaseStorage<Object *, size>{} {
+        std::cout << "Initialise Storage (Object pointer specialized)\n";
+    }
     friend std::ostream &operator<<(std::ostream &out, const Storage &str) {
         out << "Storage data: ";
         for (int i{0}; i < str.m_length; ++i) {
@@ -150,6 +156,12 @@ int main() {
     intStorage.set(2, 1);
     intStorage.set(3, 2);
     std::cout << intStorage << "==================\n";
+
+    Storage<int*, 3> intPtrStorage{};
+    intPtrStorage.set(new int{0}, 0);
+    intPtrStorage.set(new int{1}, 1);
+    intPtrStorage.set(new int{2}, 2);
+    std::cout << intPtrStorage << "==================\n";
 
     Storage<bool, 3> boolStorage{};
     boolStorage.set(true, 0);
@@ -171,5 +183,5 @@ int main() {
     std::cout << objStorage2 << "\n==================\n";
 
     // invalid index
-    objStorage.set(Object{'o'}, 50);
+    // objStorage.set(Object{'o'}, 50);
 }
