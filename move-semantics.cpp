@@ -76,6 +76,10 @@ public:
     }
 };
 
+/*
+ * If we pass the argument by value (res instead of &res), this will cause the resource be destroyed
+ * at the end of the function.
+ */
 void checkSmartPointer(const SmtPtr<Resource> &res) {
     if (res.isNull()) {
         std::cout << "null pointer\n";
