@@ -14,7 +14,8 @@ private:
         }
 
         if (smtPtr.m_ptr) {
-            m_ptr = new T{*smtPtr.m_ptr};
+            m_ptr = new T;
+            *m_ptr = *smtPtr.m_ptr;
         } else {
             m_ptr = nullptr;
         }
