@@ -14,17 +14,38 @@ public:
         std::cout << "SmtPtr initialization. " << (isNull() ? "Null" : "Not null") << '\n';
     }
 
+    //copy constructor
     SmtPtr(SmtPtr &smtPtr) {
+        std::cout << "copy initialization\n";
+        if (!smtPtr.isNull()) {
+            m_ptr = new T;
+            *m_ptr = *smtPtr.m_ptr;
+        }
+    }
+
+    // copy assignment
+    SmtPtr &operator=(const SmtPtr &smtPtr) {
+        std::cout << "copy assignment\n";
+        if (&smtPtr != this) {
+            delete m_ptr;
+            m_ptr = new T;
+            *m_ptr = *smtPtr.m_ptr;
+        }
+        return *this;
+    }
+
+    // move constructor
+    SmtPtr(SmtPtr &&smtPtr) noexcept {
+        std::cout << "move initialization\n";
         if (!smtPtr.isNull()) {
             m_ptr = smtPtr.m_ptr;
-            std::cout << "move initialization\n";
             smtPtr.m_ptr = nullptr;
         }
     }
 
-
-    SmtPtr &operator=(SmtPtr &smtPtr) {
-        std::cout << "transfer ownership\n";
+    // move assignment
+    SmtPtr &operator=(SmtPtr &&smtPtr) noexcept {
+        std::cout << "move assignment\n";
         if (&smtPtr != this) {
             delete m_ptr;
             m_ptr = smtPtr.m_ptr;
@@ -57,7 +78,7 @@ private:
 
 public:
     Resource() {
-        std::cout << "Resource acquired\n";
+        std::cout << "Resource " << std::to_string(id) << " acquired\n";
     }
 
     Resource(const Resource &res) {
@@ -69,23 +90,34 @@ public:
         return *this;
     }
 
-    ~Resource() { std::cout << "Resource destroyed\n"; }
+    ~Resource() {
+        std::cout << "Resource " << std::to_string(id) << " destroyed\n";
+    }
 
     void say() const {
         std::cout << "resource id: " + std::to_string(id) + '\n';
     }
 };
 
-/*
- * If we pass the argument by value (res instead of &res), this will cause the resource be destroyed
- * at the end of the function.
- */
 void checkSmartPointer(const SmtPtr<Resource> &res) {
     if (res.isNull()) {
         std::cout << "null pointer\n";
     } else {
         res->say();
     }
+}
+
+void checkSmartPointerCP(const SmtPtr<Resource> res) {
+    if (res.isNull()) {
+        std::cout << "null pointer\n";
+    } else {
+        res->say();
+    }
+}
+
+SmtPtr<Resource> generateResource() {
+    SmtPtr<Resource> out{new Resource};
+    return out;
 }
 
 int main() {
@@ -96,18 +128,23 @@ int main() {
 
     std::cout << "1.-------------\n";
     checkSmartPointer(smtPtr1);
-    checkSmartPointer(smtPtr1);
+    checkSmartPointerCP(smtPtr1);
 
     std::cout << "2.-------------\n";
     SmtPtr<Resource> smtPtr2(smtPtr1);
     checkSmartPointer(smtPtr2);
-    checkSmartPointer(smtPtr1);  // null pointer
+    checkSmartPointer(smtPtr1);
 
     std::cout << "3.-------------\n";
     SmtPtr<Resource> smtPtr3;
     smtPtr3 = smtPtr2;
     checkSmartPointer(smtPtr3);
-    checkSmartPointer(smtPtr2);  // null pointer
+    checkSmartPointer(smtPtr2);
 
+    std::cout << "4.-------------\n";
+    auto res2 = generateResource();  // use move constructor
+    res2->say();
+
+    std::cout << "end.-------------\n";
     return 0;
 }
